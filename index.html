@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lessons</title>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+
+<body>
+    <div id="app">
+        <main>
+            <div v-if="showLessons">
+                <h2>Lessons</h2>
+                <div class="row form-group">
+                    <div class="col-md-2 col-md-offset-0">
+                        <strong>Sort by:</strong>
+                        <select v-model="sortedByOption" class="form-control">
+                            <option v-for="sortBy in sortedBy">
+                                {{sortBy}}
+                            </option>
+                        </select>
+                        <select v-model="orderBy" class="form-control">
+                            <option value="acsending">acsending</option>
+                            <option value="descending">descending</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-md-offset-0 cart">
+                        <button type="button" class="btn btn-default btn-lg" v-on:click="showCheckout"
+                            v-show="cartItemCount">
+                            <span class="glyphicon glyphicon-shopping-cart">{{cartItemCount}}</span> Checkout
+                        </button>
+                    </div>
+                </div>
+                <div v-for="lesson in lessons">
+                    <div class="row">
+                        <div class="col-md-2 col-md-offset-0">
+                            <figure>
+                                <img class="lesson" v-bind:src="lesson.image">
+                            </figure>
+                        </div>
+                        <div class="col-md-2 col-md-offset-0 description">
+                            <h3 v-text="lesson.subject"></h3>
+                            <p>Location: {{lesson.location}}</p>
+                            <p>Price: £{{lesson.price}}</p>
+                            <p>Spaces: {{lesson.space}}</p>
+
+                            <button class=" btn btn-primary " v-on:click="addToCart(lesson)"
+                                v-if="canAddToCart(lesson)">Add to cart</button>
+                            <button disabled="true" class=" btn btn-primary" v-else>Add to cart</button>
+                            <span v-if="lesson.space === 0">All Out!
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div v-else>
+                <h2>Shopping Cart</h2>
+
+                <button type="button" class="btn btn-default btn-lg" v-on:click="showCheckout">
+                    <span class="glyphicon glyphicon-shopping-cart">{{cartItemCount}}</span> Back to Lessons
+                </button>
+
+                <div>
+                    <strong>First Name:</strong>
+                    <input type="text" v-model="firstName" />
+
+                    <strong>Phone Number</strong>
+                    <input v-model="phoneNumber" />
+
+                    <button class=" btn btn-primary" v-if="firstNameCorrect && phoneNumberCorrect && cart.length">Checkout</button>
+                </div>
+
+                <div v-for="lesson in cart">
+                    <div class="row">
+                        <div class="col-md-2 col-md-offset-0">
+                            <figure>
+                                <img class="lesson" v-bind:src="lesson.image">
+                            </figure>
+                        </div>
+                        <div class="col-md-2 col-md-offset-0 description">
+                            <h3 v-text="lesson.subject"></h3>
+                            <p>Location: {{lesson.location}}</p>
+                            <p>Price: £{{lesson.price}}</p>
+
+                            <button class=" btn btn-primary " v-on:click="removeFromCart(lesson)">Remove</button>
+                        </div>
+
+                    </div>
+        </main>
+    </div>
+
+
+    <script type="text/javascript">
+        let lessons = new Vue({
+
+            el: '#app',
+            data: {
+                sitename: "Lessons",
+                showLessons: true,
+                lessons: [],
+                cart: [],
+                sortedBy: [
+                    "subject",
+                    "location",
+                    "price",
+                    "space"
+                ],
+                sortedByOption: "subject",
+                orderBy: "acsending",
+
+                firstName: '',
+                phoneNumber: '',
+
+                firstNameCorrect: false,
+                phoneNumberCorrect: false
+            },
+
+            methods: {
+                addToCart(aLesson) {
+                    aLesson.space--;
+                    this.cart.push(aLesson);
+                },
+
+                removeFromCart(aLesson) {
+                    aLesson.space++;
+
+                    let index = this.cart.indexOf(aLesson);
+                    if (index > -1) {
+                        this.cart.splice(index, 1);
+                    }
+                },
+
+                showCheckout() {
+                    this.showLessons = this.showLessons ? false : true;
+                },
+
+                canAddToCart(aLesson) {
+                    return aLesson.space != 0;
+                },
+
+                sortBy: function (array, param, order) {
+                    let filterA, filterB;
+                    return array.sort(function (a, b) {
+                        switch (param) {
+                            case 'subject':
+                                filterA = a.subject;
+                                filterB = b.subject;
+                                break;
+                            case 'location':
+                                filterA = a.location;
+                                filterB = b.location;
+                                break;
+                            case 'price':
+                                filterA = a.price;
+                                filterB = b.price;
+                                break;
+                            case 'space':
+                                filterA = a.space;
+                                filterB = b.space;
+                                break;
+                        }
+                        if (order == "acsending") {
+                            return (filterA > filterB) ? 1 : -1;
+                        } else {
+                            return (filterA < filterB) ? 1 : -1;
+                        }
+                    });
+                },
+
+                validateNumber(val) {
+                    if (/^[0-9]+$/.test(val) && val.length >= 11) {
+                        this.phoneNumberCorrect = true;
+                    } else {
+                        this.phoneNumberCorrect = false;
+                    }
+                },
+
+                validateName(val) {
+                    if (/^[A-Za-z\s]+$/.test(val) && val.length >= 1) {
+                        this.firstNameCorrect = true;
+                    } else {
+                        this.firstNameCorrect = false;
+                    }
+                }
+            },
+
+            computed: {
+
+                cartItemCount() {
+                    return this.cart.length || '';
+                },
+            },
+
+            watch: {
+                sortedByOption: function () {
+                    this.sortBy(this.lessons, this.sortedByOption, this.orderBy);
+                },
+
+                orderBy: function () {
+                    this.sortBy(this.lessons, this.sortedByOption, this.orderBy);
+                },
+
+                phoneNumber: function () {
+                    this.validateNumber(this.phoneNumber);
+                },
+
+                firstName: function () {
+                    this.validateName(this.firstName);
+                }
+
+            },
+
+            created: function () {
+                axios.get('./lessons.json')
+                    .then((response) => {
+                        this.lessons = response.data.lessons;
+                        this.sortBy(this.lessons, this.sortedByOption, this.orderBy);
+                    });
+            },
+        });
+    </script>
+</body>
+
+</html>
