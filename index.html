@@ -217,11 +217,10 @@
             },
 
             created: function () {
-                axios.get('./lessons.json')
-                    .then((response) => {
-                        this.lessons = response.data.lessons;
-                        this.sortBy(this.lessons, this.sortedByOption, this.orderBy);
-                    });
+                fetch('https://cw2-server-cst3145.herokuapp.com/collection/Lessons')
+                    .then(response => response.json())
+                    .then(data => this.lessons = data)
+                    .catch(err => console.log(err));
             },
         });
     </script>
