@@ -73,8 +73,8 @@
                     <strong>Phone Number</strong>
                     <input v-model="phoneNumber" />
 
-                    <button class=" btn btn-primary"
-                        v-if="firstNameCorrect && phoneNumberCorrect && cart.length" v-on:click="checkout()">Checkout</button>
+                    <button class=" btn btn-primary" v-if="firstNameCorrect && phoneNumberCorrect && cart.length"
+                        v-on:click="checkout()">Checkout</button>
                 </div>
 
                 <div v-for="lesson in cart">
@@ -222,6 +222,16 @@
                         .then(data => { return data }).catch(err => { return data });
                 },
 
+                updateLessonSpaces(id, quantity) {
+                    fetch(`https://cw2-server-cst3145.herokuapp.com/collection/Lessons/${id}/space/${quantity}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => response.json())
+                        .then(data => { return data }).catch(err => { return data });
+                },
+
                 checkout() {
 
                     this.cart.forEach(item => {
@@ -233,7 +243,7 @@
                             "quantity": item.quantity
                         };
                         this.addOrder(body);
-                        
+                        this.updateLessonSpaces(item.lesson._id, item.quantity);
 
                     });
 
