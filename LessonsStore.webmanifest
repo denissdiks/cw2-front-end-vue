@@ -1,0 +1,16 @@
+{
+    "name": "Lessons Store PWA",
+    "short_name": "Lessons Store",
+    "description": "online lessons store",
+    "icons": [
+        {
+            "src": "images/Lessons_Icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+
+    "start_url": "index.html",
+    "display": "fullscreen",
+    "background_color": "#db676f"
+}
